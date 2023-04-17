@@ -1,4 +1,3 @@
---//
 Content-Type: text/x-shellscript; charset="us-ascii"
 MIME-Version: 1.0
 Content-Transfer-Encoding: 7bit
@@ -20,4 +19,3 @@ export INSTANCE_ID=$(curl -s -H "X-aws-ec2-metadata-token: $TOKEN" http://169.25
 export NEW_HOSTNAME="${hostname_prefix}-$INSTANCE_ID-$AVAILABILITY_ZONE"
 sed -i -e "s/Welcome to nginx\!/Welcome to nginx\! from $NEW_HOSTNAME/g" /usr/share/nginx/html/index.html
 systemctl start nginx
---//--

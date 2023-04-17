@@ -14,7 +14,7 @@ resource "aws_launch_template" "jlrm_launch_template" {
     update_default_version=true
 
     # Configure user data to install any software or configuration
-    user_data = filebase64("blankfactor/app/user-data.sh")
+    user_data = filebase64("blankfactor/02-app/user-data.sh")
 
     iam_instance_profile {
         name = "jlrm-instance-profile"
@@ -29,7 +29,7 @@ resource "aws_launch_template" "jlrm_launch_template" {
 
     network_interfaces {
         associate_public_ip_address     = true
-        subnet_id                       = data.aws_subnets.jlrm_data_public_subnets.ids[0]
+        subnet_id                       = local.pub_subnets_ids[0]
         security_groups                 = [aws_security_group.instance_sg.id]
     }    
 
@@ -45,7 +45,7 @@ resource "aws_launch_template" "jlrm_launch_template" {
 }
 
 resource "aws_security_group" "instance_sg" {
-    vpc_id      = data.aws_vpc.jlrm_data_vpc.id   
+    vpc_id      = var.vpc_id   
     name_prefix = "jlrm-instance-sg"
     ingress {
         from_port = 22
@@ -58,11 +58,20 @@ resource "aws_security_group" "instance_sg" {
         from_port = 80
         to_port   = 80
         protocol  = "tcp"
+        security_groups = [aws_security_group.jlrm_alb_sg.id]
+    }    
+
+    egress {
+        from_port = 0
+        to_port   = 0
+        protocol  = "-1"
         cidr_blocks = ["0.0.0.0/0"]
     }
 
     tags = {
         Name = "jlrm-sg-ec2-instance"
+        # filtered_map = var.p_sub
+        # filtered_map = join(",", local.filtered_map)
     }         
 }
 

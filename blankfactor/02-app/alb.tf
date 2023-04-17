@@ -3,7 +3,7 @@ resource "aws_lb" "jlrm_alb" {
     internal           = false
     load_balancer_type = "application"
     security_groups    = [aws_security_group.jlrm_alb_sg.id]
-    subnets            = data.aws_subnets.jlrm_data_public_subnets.ids
+    subnets            = local.pub_subnets_ids
 
     tags = {
         Name = "jlrm-alb"  
@@ -12,7 +12,7 @@ resource "aws_lb" "jlrm_alb" {
 
 resource "aws_security_group" "jlrm_alb_sg" {
     name_prefix = "jlrm"
-    vpc_id      = data.aws_vpc.jlrm_data_vpc.id    
+    vpc_id      = var.vpc_id   
 
     ingress {
         from_port = 80
@@ -21,6 +21,12 @@ resource "aws_security_group" "jlrm_alb_sg" {
         cidr_blocks = ["0.0.0.0/0"]
     }
 
+    egress {
+        from_port = 0
+        to_port   = 0
+        protocol  = "-1"
+        cidr_blocks = ["0.0.0.0/0"]
+    }    
     tags = {
         Name = "jlrm-alb-sg"
     }    
