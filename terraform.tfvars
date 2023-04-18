@@ -1,5 +1,15 @@
-# network values
-vpc_name        = "jlrm-nginx-app-vpc"
+# Global Vars
+prefix_resources_name = "jlrm"
+other_tags = {
+    developer   = "Jheison Rodriguez"
+    owner       = "Blankfactor"
+}
+
+
+
+
+# 01-Network Vars
+vpc_name        = "nginx-app-vpc"
 vpc_cidr_block      = "10.0.0.0/16" # 65534 Ips
 
 # Public and private subnets setup, 254 Ips
@@ -12,3 +22,10 @@ subnet_cicd_az_name    = {
     jlrm-private-3 = {cidr_block = "10.0.13.0/24", availability_zone = "us-east-1c"}
 }
 
+
+
+# 02-app Vars
+
+
+
+# 03-dbs Vars

@@ -6,6 +6,8 @@ Take into account the following points:
 - The web server needs to scale on-demand; when CPU load hits 65% or higher it needs to scale up, when it's 40% or lower it needs to scale down.
 
 
+# Terraform setup for Networking, Nginx Server, and RDS
+
 # testing load of CPU to trigger autoscaling
 
 run the follwing command in one of the instances
@@ -31,3 +33,16 @@ psql \
 
    passwor is in secret manager
    jlrm-rds-pass
+
+
+Feedback
+Issues:
+- Documentation could be better
+- Code has not been linked
+- Variable declarations and outputs do not ve description
+- Tags are not applied accordingly to identify resources easily
+- Hardcoding should be avoided: e.g. blankfactor/02-app/launchTemplate.tf, blankfactor/03-dbs/postgres.tf
+- Failure to meet “The data in transit must be encrypted” requirement: blankfactor/02-app/alb.tf
+- DB password:
+- it is set as an output, which is not recommended
+- documentation says it is in secret manager, jlrm-rds-pass secret, however, code does not seem to manage the secret
