@@ -1,5 +1,6 @@
 NOTE:
-TODO - enable HTTPS connection to the ALB, waiting for the validation of the ACM
+TODO - enable HTTPS connection to the ALB, waiting for the validation of the ACM, it was laredy requested
+jlrm-test-blankfactor.com
 
 
 
