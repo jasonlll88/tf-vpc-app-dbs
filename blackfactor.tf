@@ -3,7 +3,6 @@ module network_setup {
     
     other_tags              = var.other_tags
     vpc_cidr_block          = var.vpc_cidr_block
-    vpc_name                = var.vpc_name
     subnet_cicd_az_name     = var.subnet_cicd_az_name
     prefix_resources_name   = var.prefix_resources_name
 }
