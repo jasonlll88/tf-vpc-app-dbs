@@ -2,7 +2,5 @@
 resource "aws_internet_gateway" "jlrm_igw" {
     vpc_id = aws_vpc.jlrm_vpc.id
 
-    tags = {
-        Name = "jlrm-ig"
-    }
+    tags = merge(local.tags,{Name = "${var.prefix_resources_name}-ig"})    
 }

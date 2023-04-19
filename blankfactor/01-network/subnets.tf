@@ -7,7 +7,5 @@ resource "aws_subnet" "jlrm_subnets" {
 
     availability_zone = each.value.availability_zone
 
-    tags = {
-        Name = each.key
-    }
+    tags = merge(local.tags,{Name = "${var.prefix_resources_name}-${each.key}"})    
 }

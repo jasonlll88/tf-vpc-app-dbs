@@ -14,16 +14,22 @@ variable "private_subnets" {
 
 }
 
-locals {
-    pub_subnets_ids = values({
-        for subnet_name, subnet_config in var.subnets :
-        subnet_name => subnet_config.id
-        if startswith(subnet_config.name, "jlrm-public")
-    })
+variable prefix_resources_name {
+    type = string
+}
+variable asg_target_value {
+    type = number
+}
 
-    pri_subnets_ids = values({
-        for subnet_name, subnet_config in var.subnets :
-        subnet_name => subnet_config.id
-        if startswith(subnet_config.name, "jlrm-private")
-    })
+variable image_ami_id {
+    type = string
+}
+variable ec2_instance_type {
+    type = string
+}
+
+variable "other_tags" {
+    type        = map(string)
+    default     = {}
+    description = "Tags the user wants add"
 }

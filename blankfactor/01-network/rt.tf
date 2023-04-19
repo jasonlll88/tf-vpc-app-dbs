@@ -7,16 +7,12 @@ resource "aws_route_table" "jlrm_public_rt" {
         gateway_id = aws_internet_gateway.jlrm_igw.id
     }
 
-    tags = {
-        Name = "jlrm-public-rt"
-    }    
+    tags = merge(local.tags,{Name = "${var.prefix_resources_name}-public-rt"})  
 }
 
 # Associate the public subnets with the public route table
 resource "aws_route_table_association" "jlrm_public_rta" {
-    for_each = {
-        for subnet_name, values in var.subnet_cicd_az_name : subnet_name => values if substr(subnet_name, 5, 6) == "public"
-    }
+    for_each = local.public_subnets
 
     subnet_id      = aws_subnet.jlrm_subnets[each.key].id
     route_table_id = aws_route_table.jlrm_public_rt.id
@@ -37,9 +33,7 @@ resource "aws_route_table" "jlrm_private_rt" {
         aws_vpc.jlrm_vpc,
     ]
 
-    tags = {
-        Name = "jlrm-private-rt"
-    }    
+    tags = merge(local.tags,{Name = "${var.prefix_resources_name}-private-rt"})          
 }
 
 

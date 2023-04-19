@@ -1,39 +1,29 @@
-resource "random_password" "db_password" {
-    length = 16
-    special = true
-}
-
 resource "aws_db_instance" "jlrm_rds_postgres" {
-    identifier        = "jlrm-rds-postgres"
+    identifier        = "${var.prefix_resources_name}-rds-postgres"
     engine            = "postgres"
-    instance_class    = "db.t3.micro"
-    allocated_storage = 20
+    instance_class    = var.rds_instance_class
+    allocated_storage = var.rds_allocated_storage
     storage_type      = "gp2"
-    username          = "postgres"
-    # password          = random_password.db_password.result
-    password          = "postgres1234"
-    db_name           = "first_db"
+    username          = var.rds_username
+    # password is saved in secret manager
+    password          = data.aws_secretsmanager_secret_version.db_password.secret_string
+    db_name           = var.rds_db_name
     publicly_accessible = false
     db_subnet_group_name = aws_db_subnet_group.jrlm_rds_subnet_group.name
     vpc_security_group_ids = [aws_security_group.jlrm_db_sg.id]
     skip_final_snapshot  = true
-    tags = {
-        Name = "jlrm-rds-postgres"
-    }    
+    tags = merge(local.tags,{Name = "${var.prefix_resources_name}-rds-postgres"})          
 }
 
 resource "aws_db_subnet_group" "jrlm_rds_subnet_group" {
-    name       = "jlrm-rds-subnet-group"
+    name       = "${var.prefix_resources_name}-rds-subnet-group"
     subnet_ids = local.pri_subnets_ids
-
-    tags = {
-        Name = "RDS Subnet Group"
-    }
+    tags = merge(local.tags,{Name = "${var.prefix_resources_name}-rds-subnet-group"})      
 }
 
 resource "aws_security_group" "jlrm_db_sg" {
     vpc_id      = var.vpc_id  
-    name_prefix = "jlrm-db-sg"
+    name_prefix = "${var.prefix_resources_name}-db-sg"
 
     ingress {
         from_port = 5432
@@ -49,7 +39,5 @@ resource "aws_security_group" "jlrm_db_sg" {
         cidr_blocks = ["0.0.0.0/0"]
     }
 
-    tags = {
-        Name = "jlrm-db-sg"
-    }         
+    tags = merge(local.tags,{Name = "${var.prefix_resources_name}-db-sg"})         
 }

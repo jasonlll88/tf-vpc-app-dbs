@@ -1,24 +1,20 @@
-resource "aws_key_pair" "jlrm_key_pair" {
-    key_name   = "jlrm-key-pair"
-    public_key = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQCpwi8k+M3ljgYykdYr9KmVRNeWkZZivxwTKQv3Vo3New82sDlYt74Sz5anNWIAorprpF8xZzBGg1a96xvjfzoGiUxB77W/DHeLvvvLAvjoYKdjUBzFAVGgrsSUUGTH8yJtO6HLwXg2wmHgF1cQHzQVQd//TFYFVvwgOgXvyEBdrunlPjhATT5/J1eybc9kNo0Lo3ebmdAslVn3pZGH6YDLARnDf5PXk4FeUW+86dDgPtR7d1TdPlVLqLG7QCxt82FUWVA7jZ8lZx6++b/cxKVPinbtCFqfs4mgH90+6WFAmcsju28CL+Zmxk5e1K2YfsUNW36oxEZLIQuNStTvB4d1 ngingx-keypair"
-    tags = {
-        Name = "jlrm-key-pair"
-    }
-}
-
 resource "aws_launch_template" "jlrm_launch_template" {
-    name_prefix             = "jlrm-app-nginx-launch-template"
-    image_id                = "ami-06e46074ae430fba6" # amazon linux
-    instance_type           = "t2.micro"
-    key_name                = "jlrm-key-pair"
-    update_default_version=true
+    name_prefix             = "${var.prefix_resources_name}-app-nginx-launch-template"
+    image_id                = var.image_ami_id
+    instance_type           = var.ec2_instance_type
+    update_default_version  = true
 
     # Configure user data to install any software or configuration
-    user_data = filebase64("blankfactor/02-app/user-data.sh")
+    user_data = filebase64("blankfactor/02-app/files/user-data.sh")
 
     iam_instance_profile {
-        name = "jlrm-instance-profile"
+        name = aws_iam_instance_profile.jlrm_instance_profile.name
     }
+
+    metadata_options {
+        http_endpoint = "enabled"
+        http_tokens   = "required"
+    }    
 
     block_device_mappings {
         device_name = "/dev/xvda"
@@ -34,25 +30,16 @@ resource "aws_launch_template" "jlrm_launch_template" {
     }    
 
     tag_specifications {
-        resource_type = "instance"
-        tags = {
-        Name = "jlrm-app-nginx-launch-template"
-        }
+        resource_type   = "instance"
+        tags            = merge(local.tags,{Name = "${var.prefix_resources_name}-app-nginx-launch-template"}) 
     }
-    tags = {
-        Name = "jlrm-app-nginx-launch-template"
-    }      
+
+    tags = merge(local.tags,{Name = "${var.prefix_resources_name}-app-nginx-launch-template"})           
 }
 
 resource "aws_security_group" "instance_sg" {
     vpc_id      = var.vpc_id   
-    name_prefix = "jlrm-instance-sg"
-    ingress {
-        from_port = 22
-        to_port = 22
-        protocol = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
+    name_prefix = "${var.prefix_resources_name}-sg-ec2-instance"
 
     ingress {
         from_port = 80
@@ -68,38 +55,30 @@ resource "aws_security_group" "instance_sg" {
         cidr_blocks = ["0.0.0.0/0"]
     }
 
-    tags = {
-        Name = "jlrm-sg-ec2-instance"
-        # filtered_map = var.p_sub
-        # filtered_map = join(",", local.filtered_map)
-    }         
+    tags = merge(local.tags,{Name = "${var.prefix_resources_name}-sg-ec2-instance"})            
 }
 
 resource "aws_iam_instance_profile" "jlrm_instance_profile" {
-    name = "jlrm-instance-profile"
+    name = "${var.prefix_resources_name}-instance-profile"
     role = aws_iam_role.jlrm_instance_profile_role.name
-
-    tags = {
-        Name = "jlrm-instance-profile"
-    }    
+    tags = merge(local.tags,{Name = "${var.prefix_resources_name}-nstance-profile"})        
 }
 
 resource "aws_iam_role" "jlrm_instance_profile_role" {
-    name = "jlrm-instance-profile-role"
-    assume_role_policy = jsonencode({
-        Version = "2012-10-17"
-        Statement = [
-        {
-            Action = "sts:AssumeRole"
-            Effect = "Allow"
-            Principal = {
-            Service = "ec2.amazonaws.com"
-            }
-        }
-        ]
-    })
-    tags = {
-        Name = "jlrm-instance-profile-role"
-    }
+    name = "${var.prefix_resources_name}-instance-profile-role"
+    assume_role_policy = file("blankfactor/02-app/files/instance-role-trust-relationship.json")
+    tags = merge(local.tags,{Name = "${var.prefix_resources_name}-instance-profile-role"})     
 }
 
+resource "aws_iam_policy" "jlrm_iam_policy" {
+  name        = "${var.prefix_resources_name}-instance-profile-policy"
+  description = "policy for SSM"
+
+  policy = file("blankfactor/02-app/files/instance-role-policy.json")
+  tags = merge(local.tags,{Name = "${var.prefix_resources_name}-instance-profile-policy"}) 
+}
+
+resource "aws_iam_role_policy_attachment" "jlrm_iam_role_pol_attach" {
+  policy_arn = aws_iam_policy.jlrm_iam_policy.arn
+  role       = aws_iam_role.jlrm_instance_profile_role.name
+}

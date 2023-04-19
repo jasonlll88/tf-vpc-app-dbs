@@ -15,7 +15,7 @@ variable prefix_resources_name {
 }
 
 variable "other_tags" {
-  type        = map(string)
-  default     = {}
-  description = "Tags the user wants add"
+    type        = map(string)
+    default     = {}
+    description = "Tags the user wants add"
 }

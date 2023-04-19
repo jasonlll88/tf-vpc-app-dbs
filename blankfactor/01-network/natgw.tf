@@ -11,9 +11,7 @@ resource "aws_nat_gateway" "jlrm_nat_gateway" {
         aws_subnet.jlrm_subnets,
     ]
 
-    tags = {
-        Name = "jlrm-natgw"
-    }
+    tags = merge(local.tags,{Name = "${var.prefix_resources_name}-natgw"})      
 }
 
 # Create an Elastic IP address for the NAT gateways
@@ -21,9 +19,7 @@ resource "aws_eip" "jlrm_eip" {
     count = length(local.private_subnets)
     vpc   = true
 
-    tags = {
-        Name = "jlrm-eip"
-    }    
+    tags = merge(local.tags,{Name = "${var.prefix_resources_name}-eip"})         
 }
 
 # Create a route in the private route table for the NAT gateway
@@ -39,4 +35,5 @@ resource "aws_route" "jlrm_private_nat_route" {
         aws_route_table.jlrm_private_rt,
         aws_nat_gateway.jlrm_nat_gateway
     ]
+
 }
