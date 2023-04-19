@@ -1,3 +1,9 @@
+NOTE:
+TODO - enable HTTPS connection to the ALB, waiting for the validation of the ACM
+
+
+
+
 ## Requirements
 
 - Please create an nginx web service that utilizes multi-AZ in AWS. This Web service must only be accessible from NAB's public IPs (using your current public IP is also fine).
