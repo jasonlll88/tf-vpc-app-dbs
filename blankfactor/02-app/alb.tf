@@ -19,6 +19,12 @@ resource "aws_security_group" "jlrm_alb_sg" {
         protocol  = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     }
+    ingress {
+        from_port = 443
+        to_port   = 443
+        protocol  = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    }
 
     egress {
         from_port = 0
@@ -35,44 +41,39 @@ resource "aws_autoscaling_attachment" "jlrm_asg_a" {
     lb_target_group_arn   = aws_lb_target_group.jlrm_lb_tg.arn  
 }
 
-resource "aws_alb_listener" "jlrm_alb_listener" {
+data "aws_acm_certificate" "issued" {
+  domain   = "jlrm-test-blankfactor.com"
+  statuses = ["ISSUED"]
+}
+
+
+# Uncomment to enable HTTPS on the alb
+resource "aws_lb_listener" "https" {
+    load_balancer_arn = aws_lb.jlrm_alb.arn
+    port              = 443
+    protocol          = "HTTPS"
+    ssl_policy        = "ELBSecurityPolicy-TLS-1-2-2017-01"
+
+    certificate_arn = data.aws_acm_certificate.issued.arn
+
+    default_action {
+        type             = "forward"
+        target_group_arn = aws_lb_target_group.jlrm_lb_tg.arn
+    }  
+}
+
+resource "aws_alb_listener" "http" {
     load_balancer_arn = aws_lb.jlrm_alb.arn
     port              = 80
     protocol          = "HTTP"
     
     default_action {
-        type             = "forward"
-        target_group_arn = aws_lb_target_group.jlrm_lb_tg.arn
-    }      
+        type = "redirect"
+
+        redirect {
+            port        = "443"
+            protocol    = "HTTPS"
+            status_code = "HTTP_301"
+        }
+    }    
 }
-
-# # Uncomment to enable HTTPS on the alb
-# resource "aws_lb_listener" "https" {
-#     load_balancer_arn = aws_lb.jlrm_alb.arn
-#     port              = 443
-#     protocol          = "HTTPS"
-#     ssl_policy        = "ELBSecurityPolicy-TLS-1-2-2017-01"
-
-#     certificate_arn = data.aws_acm_certificate.amazon_issued.arn
-
-#     default_action {
-#         type             = "forward"
-#         target_group_arn = aws_lb_target_group.jlrm_lb_tg.arn
-#     }  
-# }
-
-# resource "aws_alb_listener" "http" {
-#     load_balancer_arn = aws_lb.jlrm_alb.arn
-#     port              = 80
-#     protocol          = "HTTP"
-    
-#     default_action {
-#         type = "redirect"
-
-#         redirect {
-#             port        = "443"
-#             protocol    = "HTTPS"
-#             status_code = "HTTP_301"
-#         }
-#     }    
-# }

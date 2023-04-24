@@ -15,11 +15,4 @@ locals {
         terraformRepo       = "https://github.com/jasonlll88/tf-vpc-app-dbs.git"
         terraformModulePath = "blankfactor/02-app"
     })
-
-    # # Uncomment to enable HTTPS on the alb
-    # data "aws_acm_certificate" "amazon_issued" {
-    #     domain      = "jlrm-test-blankfactor.com"
-    #     types       = ["AMAZON_ISSUED"]
-    #     most_recent = true
-    # }
 }
