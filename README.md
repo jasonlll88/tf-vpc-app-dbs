@@ -1,11 +1,3 @@
-## Requirements
-
-- Please create an nginx web service that utilizes multi-AZ in AWS. This Web service must only be accessible from NAB's public IPs (using your current public IP is also fine).
-- Create an RDS server that's accessible to the web servers.
-- All configurations must be as secure as possible (think of what you need to do to make everything secure).
-- The web server needs to scale on-demand; when CPU load hits 65% or higher it needs to scale up, when it's 40% or lower it needs to scale down.
-
-
 # Terraform setup for Networking, Nginx Server, and RDS
 
 This repository contains a complete deployment for an Nginx server, deployed in multi-AZ using an RDS Postgres the below diagram can give a comprehensive view of what this repo achieves
